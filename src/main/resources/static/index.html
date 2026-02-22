@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Triage demo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        :root {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            color-scheme: light dark;
+        }
+
+        body {
+            margin: 0;
+            padding: 1.5rem;
+            background: #0f172a;
+            color: #e5e7eb;
+        }
+
+        h1 {
+            margin-top: 0;
+            margin-bottom: 1rem;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1.3fr) minmax(0, 1.7fr);
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 900px) {
+            .layout {
+                grid-template-columns: minmax(0, 1fr);
+            }
+        }
+
+        .card {
+            background: rgba(15, 23, 42, 0.9);
+            border-radius: 0.75rem;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            padding: 1rem 1.25rem;
+            box-shadow: 0 18px 35px rgba(15, 23, 42, 0.75);
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            margin-bottom: 0.35rem;
+            color: #9ca3af;
+        }
+
+        textarea,
+        select,
+        input[type="text"] {
+            width: 100%;
+            border-radius: 0.5rem;
+            border: 1px solid rgba(148, 163, 184, 0.6);
+            padding: 0.55rem 0.7rem;
+            background: rgba(15, 23, 42, 0.7);
+            color: #e5e7eb;
+            font: inherit;
+            resize: vertical;
+            min-height: 90px;
+        }
+
+        textarea:focus,
+        select:focus,
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #38bdf8;
+            box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.5);
+        }
+
+        .row {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 0.75rem;
+        }
+
+        .row > * {
+            flex: 1;
+        }
+
+        button {
+            border-radius: 9999px;
+            border: none;
+            padding: 0.55rem 1.1rem;
+            font: inherit;
+            cursor: pointer;
+            background: linear-gradient(135deg, #38bdf8, #6366f1);
+            color: #0f172a;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        button[disabled] {
+            opacity: 0.6;
+            cursor: default;
+        }
+
+        .status {
+            margin-top: 0.5rem;
+            font-size: 0.85rem;
+            color: #9ca3af;
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.15rem 0.6rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            border: 1px solid rgba(148, 163, 184, 0.5);
+        }
+
+        .pill--ticket {
+            border-color: rgba(52, 211, 153, 0.7);
+            color: #6ee7b7;
+        }
+
+        .pill--not-ticket {
+            border-color: rgba(248, 250, 252, 0.25);
+            color: #e5e7eb;
+        }
+
+        .list {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            max-height: 60vh;
+            overflow: auto;
+        }
+
+        .list-item {
+            border-bottom: 1px solid rgba(30, 64, 175, 0.7);
+            padding: 0.65rem 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .list-item:last-child {
+            border-bottom: none;
+        }
+
+        .list-header {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.75rem;
+            align-items: center;
+            font-size: 0.85rem;
+            color: #9ca3af;
+        }
+
+        .list-title {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #e5e7eb;
+        }
+
+        /* Ticket: pavadinimas aiškiai atskirtas nuo summary */
+        .ticket-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #f8fafc;
+            margin: 0.35rem 0 0.5rem 0;
+            padding-left: 0.5rem;
+            border-left: 3px solid #38bdf8;
+            line-height: 1.35;
+        }
+        .ticket-summary-wrap {
+            margin-top: 0.25rem;
+        }
+        .ticket-summary-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: #64748b;
+            margin-bottom: 0.2rem;
+        }
+        .ticket-summary {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+<h1>Comment triage demo</h1>
+
+<div class="layout">
+    <section class="card">
+        <h2>Submit comment</h2>
+        <form id="commentForm">
+            <div>
+                <label for="commentText">Comment text</label>
+                <textarea id="commentText" required
+                          placeholder="Describe your issue or feedback here..."></textarea>
+            </div>
+            <div class="row">
+                <div>
+                    <label for="source">Source</label>
+                    <select id="source">
+                        <option value="appstore">appstore</option>
+                        <option value="web">web</option>
+                        <option value="email">email</option>
+                        <option value="other" selected>other</option>
+                    </select>
+                </div>
+                <div style="align-self:flex-end;">
+                    <button type="submit" id="submitBtn">
+                        <span>Send to triage</span>
+                    </button>
+                </div>
+            </div>
+        </form>
+        <div class="status" id="formStatus"></div>
+    </section>
+
+    <section class="card">
+        <h2>Tickets</h2>
+        <div class="row" style="margin-top:0;align-items:center;justify-content:space-between;">
+            <small>Latest tickets created from comments</small>
+            <button type="button" id="reloadTicketsBtn">Reload</button>
+        </div>
+        <ul class="list" id="ticketsList"></ul>
+    </section>
+</div>
+
+<section class="card" style="margin-top:1.5rem;">
+    <h2>Comments</h2>
+    <div class="row" style="margin-top:0;align-items:center;justify-content:space-between;">
+        <small>All comments (including those not converted to tickets)</small>
+        <button type="button" id="reloadCommentsBtn">Reload</button>
+    </div>
+    <ul class="list" id="commentsList"></ul>
+</section>
+
+<script>
+    const form = document.getElementById('commentForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const statusEl = document.getElementById('formStatus');
+    const ticketsList = document.getElementById('ticketsList');
+    const commentsList = document.getElementById('commentsList');
+    const reloadTicketsBtn = document.getElementById('reloadTicketsBtn');
+    const reloadCommentsBtn = document.getElementById('reloadCommentsBtn');
+
+    async function loadTickets() {
+        ticketsList.innerHTML = '<li class="list-item">Loading tickets...</li>';
+        try {
+            const res = await fetch('/tickets');
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const data = await res.json();
+            if (!data.length) {
+                ticketsList.innerHTML = '<li class="list-item"><small>No tickets yet.</small></li>';
+                return;
+            }
+            ticketsList.innerHTML = '';
+            data.forEach(t => {
+                const li = document.createElement('li');
+                li.className = 'list-item';
+                li.innerHTML = `
+          <div class="list-header">
+            <span>#${t.id} · ${t.category ?? 'other'} · ${t.priority ?? 'medium'}</span>
+            <span><small>${new Date(t.createdAt).toLocaleString()}</small></span>
+          </div>
+          <div class="ticket-title">${t.title || '(no title)'}</div>
+          <div class="ticket-summary-wrap">
+            <div class="ticket-summary-label">Summary</div>
+            <div class="ticket-summary">${t.summary || '–'}</div>
+          </div>
+          <div><small>Comment ID: ${t.commentId ?? '–'}</small></div>
+        `;
+                ticketsList.appendChild(li);
+            });
+        } catch (e) {
+            ticketsList.innerHTML = '<li class="list-item"><small>Error loading tickets.</small></li>';
+        }
+    }
+
+    async function loadComments() {
+        commentsList.innerHTML = '<li class="list-item">Loading comments...</li>';
+        try {
+            const res = await fetch('/comments');
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const data = await res.json();
+            if (!data.length) {
+                commentsList.innerHTML = '<li class="list-item"><small>No comments yet.</small></li>';
+                return;
+            }
+            commentsList.innerHTML = '';
+            data.forEach(c => {
+                const li = document.createElement('li');
+                li.className = 'list-item';
+                const pillClass = c.convertedToTicket ? 'pill pill--ticket' : 'pill pill--not-ticket';
+                const pillText = c.convertedToTicket ? 'ticket created' : 'no ticket';
+                li.innerHTML = `
+          <div class="list-header">
+            <span>#${c.id} · ${c.source ?? 'unknown'}</span>
+            <span class="${pillClass}">${pillText}${c.ticketId ? ' · #' + c.ticketId : ''}</span>
+          </div>
+          <div class="list-title">${c.text}</div>
+          <div><small>${new Date(c.createdAt).toLocaleString()}</small></div>
+        `;
+                commentsList.appendChild(li);
+            });
+        } catch (e) {
+            commentsList.innerHTML = '<li class="list-item"><small>Error loading comments.</small></li>';
+        }
+    }
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const text = document.getElementById('commentText').value.trim();
+        const source = document.getElementById('source').value;
+        if (!text) return;
+
+        submitBtn.disabled = true;
+        statusEl.textContent = 'Sending to AI triage...';
+        try {
+            const res = await fetch('/comments', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text, source })
+            });
+            if (!res.ok) {
+                const err = await res.text();
+                throw new Error(err || ('HTTP ' + res.status));
+            }
+            const data = await res.json();
+            statusEl.textContent =
+                `Saved comment #${data.id}. ` +
+                (data.convertedToTicket
+                    ? `Ticket created (ID ${data.ticketId}).`
+                    : 'AI decided no ticket is needed.');
+            form.reset();
+            await Promise.all([loadComments(), loadTickets()]);
+        } catch (err) {
+            statusEl.textContent = 'Error: ' + err.message;
+        } finally {
+            submitBtn.disabled = false;
+        }
+    });
+
+    reloadTicketsBtn.addEventListener('click', loadTickets);
+    reloadCommentsBtn.addEventListener('click', loadComments);
+
+    // initial load
+    loadTickets();
+    loadComments();
+</script>
+</body>
+</html>
