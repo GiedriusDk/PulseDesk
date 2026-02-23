@@ -22,12 +22,10 @@ https://huggingface.co/settings/tokens
 Mac / Linux:
 
 export HF_API_KEY=hf_your_token_here
-export HF_MODEL=HuggingFaceTB/SmolLM3-3B:hf-inference
 
 Windows (PowerShell):
 
 setx HF_API_KEY "hf_your_token_here"
-setx HF_MODEL "HuggingFaceTB/SmolLM3-3B:hf-inference"
 
 ---
 
