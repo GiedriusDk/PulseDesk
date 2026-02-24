@@ -9,6 +9,7 @@
 ## 1. Clone the Repository
 
 git clone https://github.com/GiedriusDk/PulseDesk.git
+
 cd PulseDesk
 
 ---
