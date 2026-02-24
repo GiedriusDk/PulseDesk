@@ -2,7 +2,6 @@
 
 Spring Boot backend application that analyzes user comments using the Hugging Face Inference API and automatically converts relevant comments into structured support tickets.
 
----
 
 # Setup Instructions
 
